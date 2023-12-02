@@ -1,0 +1,15 @@
+# Server:
+    # System:
+        SocketServer
+        PeerServer
+    # Room:
+        Clients[] of type -> Client
+        NewClient( Client )
+        DelClient( Client )
+        # Client:
+            id
+            peerid
+            gamertag
+            Call( peerid ) / socket
+            CloseCall( peerid ) / socket
+            Kick() / socket
