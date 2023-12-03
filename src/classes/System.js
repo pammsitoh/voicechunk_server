@@ -44,7 +44,7 @@ export class System{
         
         // Codigo para obtener la informacion del servidor de minecraft...
         const app = express();
-        const port = vc_config.port;
+        const port = process.env.PORT || vc_config.port;
 
         app.use(cors())
         app.use(express.json())
