@@ -4,6 +4,7 @@ import { StartSockerServer } from "./src/SocketServer.js";
 import figlet from 'figlet';
 import { World } from "./src/World.js";
 import { System } from "./src/classes/System.js";
+import packagy from "./package.json" assert { type: "json" }
 
 //Inititialize
 
@@ -23,8 +24,8 @@ figlet.text(
             return;
         }
         console.clear();
-        console.log(data.magenta + "\n ==< v1.0.0 >==\n\n".magenta);
-        Logger("Iniciando Servidor...");
+        console.log(data.magenta + `\n ==< v${packagy.version} >==\n\n`.magenta);
+        Logger("Starting Server...");
     }
 )
 

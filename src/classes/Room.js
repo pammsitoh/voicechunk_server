@@ -8,6 +8,7 @@ export class Room {
     * @type {Array.<Client>}
     */
     #Clients
+    #ClientsByGamertag
 
     constructor() {
         this.#Clients = [];
@@ -24,19 +25,16 @@ export class Room {
         // # Event #
         this.onNewClientAdded( client );
     }
-
+    
     /**
      * @param {Client} client
      * @description Remueve un cliente de la sala.
      */
-    delClientById(ID) {
-        const client = this.getClientById(ID);
-
+    removeClient( client ) {
         if (client) {
             const index = this.#Clients.findIndex(c => c === client);
             if (index !== -1) {
                 this.#Clients.splice(index, 1);
-
                 // # Event #
                 this.onClientExit(client);
             } else {
@@ -45,6 +43,15 @@ export class Room {
         } else {
             Logger(`Se Intento Eliminar Un Cliente Inexistente`.red);
         }
+    }
+
+    /**
+     * @param {Client} client
+     * @description Remueve un cliente de la sala.
+     */
+    delClientById(ID) {
+        const client = this.getClientById(ID);
+        this.removeClient(client)
     }
 
 
@@ -101,7 +108,7 @@ export class Room {
 
     /**
      * 
-     * @param {Array<String} gamertagList 
+     * @param {Array<String>} gamertagList 
      */
     validPlayersMap( gamertagList ){
         return gamertagList.map( g => {
@@ -114,6 +121,29 @@ export class Room {
         })
     }
 
+    /**
+     * 
+     * @param {Client} firstclient 
+     * @param {Client} secondclient 
+     */
+    getProximityVolume( firstclient, secondclient ) {
+        const a = firstclient.getPosition();
+        const b = secondclient.getPosition();
+
+        // Calcular la distancia entre los puntos a y b
+        const distance = Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2));
+        
+        // Definir un umbral de distancia
+        const threshold = 16;
+        
+        // Si la distancia es mayor que el umbral, devolver 0
+        if (distance > threshold) return 0;
+        
+        // Mapear la distancia al rango de 0 a 1 usando la función sigmoide
+        const proximityVolume = (threshold - distance) / threshold - 0;
+        return proximityVolume;
+    }
+
     /** 
      * @param {Array<String>} playerList
      * @description actualizar chat de proximidad...
@@ -124,7 +154,6 @@ export class Room {
         // calcular cercanos...
         for(const gamertag of players){
             if( gamertag === undefined || null) continue;
-            //Logger(gamertag);
             const current_client = this.getClientByGamertag(gamertag);
             /** @type {Array<Client>} */
             const nearests = [];
@@ -135,7 +164,7 @@ export class Room {
 
                 const ply = this.getClientByGamertag(gmt);
                 if( current_client.getPosition().isInRange( ply.getPosition(), vc_config.listening_range) ){
-                    Logger(`[${ply.getGamertag()}] entro al rango de -> ${current_client.getGamertag()}`)
+                    // Logger(`[${ply.getGamertag()}] entro al rango de -> ${current_client.getGamertag()}`)
                     nearests.push(ply);
                 }
             }
@@ -145,7 +174,8 @@ export class Room {
                     return {
                         gamertag: cl.getGamertag(),
                         peerID: cl.getPeerId(),
-                        socketID: cl.getSocketId()
+                        socketID: cl.getSocketId(),
+                        volume: this.getProximityVolume(current_client, cl)
                     }
                 })
             });
@@ -154,8 +184,6 @@ export class Room {
                 current_client.Call(NearestPlayer.getPeerId());
             }
         }
-
-         
     }
 
     // * EVENTS *
@@ -167,7 +195,7 @@ export class Room {
     onNewClientAdded( client ) {
         for (let i = 0; i < this.getAllClients().length; i++) {
             const _client = this.getAllClients()[i];
-            
+
             if( _client.getPeerId != client.getPeerId ){
                 _client.Call(client.getPeerId());
             }
@@ -181,7 +209,7 @@ export class Room {
     onClientExit( client ) {
         for (let i = 0; i < this.getAllClients().length; i++) {
             const _client = this.getAllClients()[i];
-            
+
             if( _client?.getPeerId != client?.getPeerId ){
                 _client?.CloseCall(client?.getPeerId());
             }

@@ -4,14 +4,21 @@ import http from 'http';
 import express from 'express';
 import { Room } from "./Room.js";
 import cors from 'cors'
+import colors from 'colors';
 import { vc_config } from "../../vchunk.config.js";
+import { config } from 'dotenv'
 import { WorldData } from "./WorldData.js";
+import { Logger } from "../utils/Logger.js";
 
 export class System{
-    constructor( options ) {
+    #password
 
+    constructor( options ) {
+        config();
         this._MainRoom = new Room();
         this.worldData = new WorldData();
+        this.#password = process.env.ACCESS_TOKEN || "examplepassword"
+        this.debugMode = vc_config.debugMode;
 
         this.StartWorldData();
     }
@@ -41,14 +48,13 @@ export class System{
     }
 
     StartWorldData() {
-        
         // Codigo para obtener la informacion del servidor de minecraft...
         const app = express();
         const port = process.env.PORT || vc_config.port;
 
         app.use(cors())
         app.use(express.json())
-        
+
         const theservy = http.createServer(app);
 
         StartSockerServer(theservy);
@@ -59,6 +65,12 @@ export class System{
         // Ruta de ejemplo para que el servidor de minecraft mande los datos...
         app.post('/voiceapi', (req, res) => {
             const data = req.body;
+            if( data.token != this.#password ) {
+                this.debugMode ? this.Logger(`Access denied to: ${req.ip}`.red) : null;
+                return;
+            };
+            this.debugMode ? this.Logger(`Access Allow to: ${req.ip}`.green) : null;
+
             res.setHeader('Content-Type', 'application/json');
             this.worldData.players = data.players;
 

@@ -118,7 +118,7 @@ export class Client {
     delNearestPlayer( gamertag ) {
         const index = this.#world.nearestPlayers.indexOf( gamertag )
         this.#world.nearestPlayers.splice(index, 1);
-    } 
+    }
 
     // * CALL METHODS
 

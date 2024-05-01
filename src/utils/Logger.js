@@ -1,7 +1,6 @@
 import colors from 'colors'
 
 export const Logger = ( text ) => {
-
     const currentDate = new Date();
 
     const day = currentDate.getDate();
@@ -12,11 +11,10 @@ export const Logger = ( text ) => {
     const options = {
         hour: '2-digit',
         minute: '2-digit',
-        hour12: true
+        hour12: true,
     };
 
     const timeString = currentDate.toLocaleTimeString('en-US', options);
     
     console.log(`[${month}/${day}/${year} | ${timeString}]: `.cyan + text);
-
 }
