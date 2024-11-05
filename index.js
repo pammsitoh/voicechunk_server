@@ -4,7 +4,7 @@ import { StartSockerServer } from "./src/SocketServer.js";
 import figlet from 'figlet';
 import { World } from "./src/World.js";
 import { System } from "./src/classes/System.js";
-import packagy from "./package.json" assert { type: "json" }
+import packagy from "./package.json" with { type: "json" }
 
 //Inititialize
 

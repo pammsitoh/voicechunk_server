@@ -8,7 +8,7 @@ export class Client {
     #PeerId
     #world
     #talking
-    /** @type {Array<String} */
+    /** @type {Array<String>} */
     #incomingCalls
     /*** @type {Socket} */
     #MySocket
